@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Lịch tập">
+<title>Lịch tập hôm nay</title>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif; background: #f7f7f5; color: #1a1a1a; padding: 16px; }
+  .top { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  h1 { font-size: 18px; }
+  .daytitle { font-size: 15px; color: #c0392b; font-weight: 700; }
+  .tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 14px; }
+  .tab { border: 1px solid #ddd; background: #fff; border-radius: 18px; padding: 9px 14px; font-size: 14px; cursor: pointer; }
+  .tab.active { background: #2c3e50; color: #fff; border-color: #2c3e50; }
+  .tab.today { border-color: #c0392b; font-weight: 700; }
+  .card { background: #fff; border: 1px solid #e5e5e2; border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; }
+  .card.done { background: #eef8f0; border-color: #bde3c5; }
+  .exhead { display: flex; align-items: flex-start; gap: 10px; }
+  .exhead input[type=checkbox] { width: 20px; height: 20px; margin-top: 2px; accent-color: #27ae60; flex-shrink: 0; }
+  .exname { font-weight: 700; font-size: 15px; }
+  .exmeta { font-size: 13px; color: #555; margin-top: 2px; }
+  .excue { font-size: 12.5px; color: #c0392b; margin-top: 3px; }
+  .last { font-size: 12.5px; color: #2471a3; margin-top: 3px; }
+  .inputs { display: flex; gap: 8px; margin-top: 9px; flex-wrap: wrap; }
+  .inputs input[type=text] { border: 1px solid #ddd; border-radius: 8px; padding: 7px 9px; font-size: 14px; }
+  .w-kg { width: 110px; }
+  .w-note { flex: 1; min-width: 150px; }
+  .weightbox { background: #fff; border: 1px solid #e5e5e2; border-radius: 12px; padding: 11px 14px; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .weightbox label { font-size: 14px; font-weight: 600; }
+  .weightbox input { border: 1px solid #ddd; border-radius: 8px; padding: 7px 9px; font-size: 14px; width: 90px; }
+  .weightbox .avg { font-size: 13px; color: #2471a3; }
+  .footer { font-size: 12.5px; color: #777; margin-top: 14px; line-height: 1.5; }
+  .savedflash { color: #27ae60; font-size: 12.5px; visibility: hidden; }
+  .progress { font-size: 13px; color: #555; margin-bottom: 10px; }
+  .histbtn { background: none; border: none; color: #2471a3; font-size: 12.5px; cursor: pointer; padding: 3px 0; text-decoration: underline; }
+  .hist { margin-top: 6px; font-size: 12.5px; color: #444; background: #f4f8fb; border-radius: 8px; padding: 7px 10px; display: none; }
+  .hist div { padding: 1px 0; }
+  .export { display: block; margin: 16px auto 4px; background: #2c3e50; color: #fff; border: none; border-radius: 10px; padding: 11px 18px; font-size: 14px; cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="top">
+  <h1>🏋️ Lịch tập</h1>
+  <div class="daytitle" id="dayTitle"></div>
+</div>
+
+<div class="weightbox">
+  <label>⚖️ Cân sáng nay (kg):</label>
+  <input type="text" id="bodyw" inputmode="decimal" placeholder="71.4">
+  <span class="avg" id="avg7"></span>
+  <span class="savedflash" id="flash">✓ đã lưu</span>
+</div>
+
+<div class="tabs" id="tabs"></div>
+<div class="progress" id="progress"></div>
+<div id="list"></div>
+
+<button class="export" id="exportBtn">⬇️ Xuất toàn bộ dữ liệu (CSV cho Excel)</button>
+
+<div class="footer">
+  Double progression: đạt mức rep trên ở <b>tất cả</b> set → buổi sau tăng tạ (+2,5kg, hip thrust +5kg/bên).
+  Nghỉ: bài chính 2–3p, bài phụ 60–90s. Deload tuần 6 &amp; 12: giữ tạ, còn 2 set/bài.
+  Dữ liệu lưu trên máy bạn — Dữ liệu nằm trong trình duyệt điện thoại — luôn mở bằng cùng 1 trình duyệt/icon, đừng xoá dữ liệu website Safari. Thỉnh thoảng bấm Xuất CSV để backup.
+</div>
+
+<script>
+const PLAN = {
+ 1: { title: "Thứ 2 – PULL A (nặng)", ex: [
+  ["Kéo xà rộng tay","4 x 6–8","Body (+2,5kg nếu dễ)","ƯU TIÊN LAT: kéo khuỷu tay xuống-vào hông, giữ 1s ở đáy"],
+  ["Barbell Row","4 x 6–8","75kg","Bài chính"],
+  ["Kéo lat pulldown máy robot","3 x 10–12","60kg/bên","Ngả nhẹ, kéo về xương ức, squeeze lat dưới"],
+  ["Hyperextension","3 x 10–12","55kg",""],
+  ["Tay trước với EZ bar","3 x 8–10","30kg",""],
+  ["Tay trước với cáp","2 x 12–15","45kg",""]]},
+ 2: { title: "Thứ 3 – LEGS A (đùi trước)", ex: [
+  ["Squat","4 x 5–7","92,5kg","Bài chính"],
+  ["RDL","3 x 8–10","90kg",""],
+  ["Bulgarian Split Squat","3 x 10–12","DB 22,5 x2",""],
+  ["Đá đùi trước","3 x 10–12","100kg",""],
+  ["Móc đùi sau","3 x 12","70kg",""],
+  ["Hip adduction","3 x 12–15","50–70kg tuỳ máy",""]]},
+ 3: { title: "Thứ 4 – PUSH A (ngực nặng)", ex: [
+  ["Ngực trên với máy smith","4 x 6–8","60kg","ƯU TIÊN NGỰC TRÊN: làm bài đầu khi sung nhất"],
+  ["Dips","4 x 6–8","Body +12,5kg","Nghiêng người trước để ăn ngực"],
+  ["Ép ngực với máy","3 x 10–12","62kg",""],
+  ["Vai trước với máy smith","3 x 8–10","50kg",""],
+  ["Bay vai với cáp","4 x 12–15","36kg/bên","ƯU TIÊN VAI GIỮA: khống chế 2s khi hạ"],
+  ["Tay sau với cáp cao","3 x 10–12","50kg",""]]},
+ 4: { title: "Thứ 5 – PULL B (volume)", ex: [
+  ["Kéo xà hẹp tay song song","4 x 8–10","Body",""],
+  ["Ngồi kéo ngang rộng tay với cáp","4 x 10–12","65kg",""],
+  ["Ngồi robot kéo tay dọc hẹp tay","3 x 9–11","65kg/bên","Kéo sâu, căng lat ở điểm duỗi"],
+  ["Ngồi robot kéo tay ngang rộng tay","3 x 10–12","55kg/bên",""],
+  ["Bay vai sau với máy ép ngực","3 x 12–15","62kg",""],
+  ["Tay trước với cáp","3 x 10–12","50kg",""]]},
+ 5: { title: "Thứ 6 – PUSH B (vai)", ex: [
+  ["Overhead push với máy robot","4 x 8–10","30kg/bên","Bài chính"],
+  ["Ngực nghiêng với máy robot","3 x 10–12","40kg/bên","Góc nghiêng = thêm volume ngực trên"],
+  ["Ép ngực góc cao với cáp","3 x 10–12","35kg/bên","Đánh ngực trên — vùng ưu tiên"],
+  ["Upright Row","3 x 10–12","45kg","Kéo tới ngực, khuỷu không quá vai"],
+  ["Bay vai với cáp","3 x 15–20","30kg/bên","Nhẹ, pump, nghỉ 45s"],
+  ["Tay sau với cáp set thấp","3 x 12–15","45kg",""]]},
+ 6: { title: "Thứ 7 – LEGS B (mông + đùi sau)", ex: [
+  ["Hip Thrust với máy robot","4 x 10–12","80kg/bên","Bài chính. Đạt 4x12 → +5kg/bên"],
+  ["Squat (nhẹ)","3 x 8–10","80kg","~85% ngày nặng, tập kỹ thuật"],
+  ["Kick back (đá dọc)","3 x 12–13 mỗi chân","45kg",""],
+  ["Kick back (đá ngang)","3 x 12 mỗi bên","26kg",""],
+  ["Seated Hip Abduction","3 x 12–15","80–100kg tuỳ máy",""],
+  ["Móc đùi sau","3 x 12–15","65kg","Nhẹ hơn Legs A"]]},
+ 0: { title: "Chủ nhật – PUSH C pump (tuỳ chọn)", ex: [
+  ["Ép ngực góc dưới với cáp","3 x 12–15","27kg/bên","Pump nhẹ, squeeze 1s, không tới liệt cơ"],
+  ["Bay vai với cáp","3 x 15–20","30kg/bên",""],
+  ["Tay sau với cáp cao","2 x 15","40kg",""],
+  ["Đi bộ 30–40 phút","—","—","Tính vào 120p cardio/tuần. Tuần mệt/ngủ kém → chỉ đi bộ, khỏi tạ"]]},
+};
+
+const todayDow = new Date().getDay();
+let viewDow = todayDow;
+const dateKey = d => d.toISOString().slice(0,10);
+const TODAY = dateKey(new Date());
+
+function load(k, fb) { try { return JSON.parse(localStorage.getItem(k)) ?? fb; } catch(e){ return fb; } }
+function save(k, v) { localStorage.setItem(k, JSON.stringify(v)); flash(); }
+function flash() {
+  const f = document.getElementById('flash');
+  f.style.visibility = 'visible';
+  clearTimeout(f._t); f._t = setTimeout(() => f.style.visibility = 'hidden', 1200);
+}
+
+// ---- body weight ----
+const bw = document.getElementById('bodyw');
+const weights = load('bodyweights', {});
+if (weights[TODAY]) bw.value = weights[TODAY];
+bw.addEventListener('change', () => {
+  const v = parseFloat(bw.value.replace(',','.'));
+  if (!isNaN(v) && v > 30 && v < 200) { weights[TODAY] = v; save('bodyweights', weights); }
+  renderAvg();
+});
+function renderAvg() {
+  const entries = Object.entries(weights).sort((a,b)=>a[0]<b[0]?1:-1).slice(0,7);
+  if (entries.length >= 3) {
+    const avg = entries.reduce((s,e)=>s+e[1],0)/entries.length;
+    document.getElementById('avg7').textContent = `TB ${entries.length} ngày gần nhất: ${avg.toFixed(2)} kg`;
+  } else {
+    document.getElementById('avg7').textContent = 'Điền mỗi sáng — từ 3 ngày sẽ hiện trung bình';
+  }
+}
+renderAvg();
+
+// ---- tabs ----
+const NAMES = ['CN','T2','T3','T4','T5','T6','T7'];
+const tabsEl = document.getElementById('tabs');
+[1,2,3,4,5,6,0].forEach(d => {
+  const b = document.createElement('button');
+  b.className = 'tab' + (d===viewDow?' active':'') + (d===todayDow?' today':'');
+  b.textContent = NAMES[d] + (d===todayDow?' • nay':'');
+  b.onclick = () => { viewDow = d; render(); };
+  tabsEl.appendChild(b);
+});
+
+// ---- exercise list ----
+function render() {
+  document.querySelectorAll('.tab').forEach((b,i) => {
+    const d = [1,2,3,4,5,6,0][i];
+    b.classList.toggle('active', d===viewDow);
+  });
+  const plan = PLAN[viewDow];
+  document.getElementById('dayTitle').textContent = plan.title;
+  const list = document.getElementById('list');
+  list.innerHTML = '';
+  const log = load('exlog', {});   // { exName: [{d, kg, note}] }
+  const doneMap = load('done_' + TODAY, {});
+  let doneCount = 0;
+
+  plan.ex.forEach(([name, setrep, target, cue]) => {
+    const hist = (log[name] || []);
+    const lastOther = hist.filter(h => h.d !== TODAY).slice(-1)[0];
+    const todayEntry = hist.filter(h => h.d === TODAY).slice(-1)[0];
+    const isDone = viewDow===todayDow && doneMap[name];
+    if (isDone) doneCount++;
+
+    const card = document.createElement('div');
+    card.className = 'card' + (isDone ? ' done' : '');
+    const cb = viewDow===todayDow
+      ? `<input type="checkbox" ${isDone?'checked':''} data-ex="${name}" class="donecb">` : '';
+    card.innerHTML = `
+      <div class="exhead">${cb}
+        <div style="flex:1">
+          <div class="exname">${name}</div>
+          <div class="exmeta">${setrep} &nbsp;·&nbsp; mục tiêu: <b>${target}</b></div>
+          ${cue ? `<div class="excue">${cue}</div>` : ''}
+          ${lastOther ? `<div class="last">Lần trước (${lastOther.d.slice(5)}): ${lastOther.kg}${lastOther.note ? ' — ' + lastOther.note : ''}</div>` : ''}
+          ${hist.length > 1 ? `<button class="histbtn" data-ex="${name}">📜 Xem lịch sử (${hist.length} buổi) ▾</button><div class="hist" id="hist-${plan.ex.findIndex(e=>e[0]===name)}">${hist.slice(-10).reverse().map(h=>`<div><b>${h.d.slice(5)}</b>: ${h.kg||'—'}${h.note?' — '+h.note:''}</div>`).join('')}</div>` : ''}
+          <div class="inputs">
+            <input type="text" class="w-kg" inputmode="decimal" placeholder="Tạ hôm nay" data-ex="${name}" data-f="kg" value="${todayEntry?todayEntry.kg:''}">
+            <input type="text" class="w-note" placeholder="Note (rep đạt, cảm giác...)" data-ex="${name}" data-f="note" value="${todayEntry?(todayEntry.note||''):''}">
+          </div>
+        </div>
+      </div>`;
+    list.appendChild(card);
+  });
+
+  document.getElementById('progress').textContent =
+    viewDow===todayDow ? `Hôm nay: ${doneCount}/${plan.ex.length} bài hoàn thành` : '(đang xem ngày khác — quay lại tab "nay" để tick)';
+
+  list.querySelectorAll('.histbtn').forEach(b => b.addEventListener('click', () => {
+    const h = b.nextElementSibling;
+    h.style.display = h.style.display === 'block' ? 'none' : 'block';
+  }));
+  list.querySelectorAll('.donecb').forEach(cb => cb.addEventListener('change', () => {
+    const m = load('done_' + TODAY, {});
+    m[cb.dataset.ex] = cb.checked;
+    save('done_' + TODAY, m);
+    render();
+  }));
+  list.querySelectorAll('input[type=text]').forEach(inp => inp.addEventListener('change', () => {
+    const name = inp.dataset.ex;
+    const log2 = load('exlog', {});
+    const arr = log2[name] || [];
+    let e = arr.find(h => h.d === TODAY);
+    if (!e) { e = { d: TODAY, kg: '', note: '' }; arr.push(e); }
+    const kgInp = list.querySelector(`input[data-ex="${CSS.escape(name)}"][data-f="kg"]`);
+    const ntInp = list.querySelector(`input[data-ex="${CSS.escape(name)}"][data-f="note"]`);
+    e.kg = kgInp.value.trim(); e.note = ntInp.value.trim();
+    log2[name] = arr.slice(-60);
+    save('exlog', log2);
+  }));
+}
+render();
+
+// ---- export CSV ----
+document.getElementById('exportBtn').addEventListener('click', () => {
+  const log = load('exlog', {});
+  const w = load('bodyweights', {});
+  let rows = [['Loại','Ngày','Bài tập','Tạ','Note']];
+  Object.entries(w).sort().forEach(([d,v]) => rows.push(['Cân nặng', d, '', String(v), '']));
+  Object.entries(log).forEach(([ex, arr]) =>
+    arr.forEach(h => rows.push(['Buổi tập', h.d, ex, h.kg||'', h.note||''])));
+  const csv = '﻿' + rows.map(r => r.map(c => '"' + String(c).replace(/"/g,'""') + '"').join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv;charset=utf-8'}));
+  a.download = 'du_lieu_tap_' + TODAY + '.csv';
+  a.click();
+});
+</script>
+</body>
+</html>
