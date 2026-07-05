@@ -41,6 +41,16 @@
   .hist { margin-top: 6px; font-size: 12.5px; color: #444; background: #f4f8fb; border-radius: 8px; padding: 7px 10px; display: none; }
   .hist div { padding: 1px 0; }
   .export { display: block; margin: 16px auto 4px; background: #2c3e50; color: #fff; border: none; border-radius: 10px; padding: 11px 18px; font-size: 14px; cursor: pointer; }
+  .mealbox { background: #fff; border: 1px solid #e5e5e2; border-radius: 12px; padding: 12px 14px; margin-bottom: 14px; }
+  .mealbox h2 { font-size: 15px; margin-bottom: 8px; }
+  .mealcount { font-size: 13px; color: #2471a3; font-weight: 600; }
+  .mealcount.full { color: #27ae60; }
+  .meals { display: flex; flex-wrap: wrap; gap: 7px; margin: 8px 0; }
+  .meal { display: flex; align-items: center; gap: 6px; border: 1px solid #ddd; border-radius: 18px; padding: 8px 13px; font-size: 13.5px; cursor: pointer; user-select: none; background: #fafafa; }
+  .meal.on { background: #eef8f0; border-color: #27ae60; font-weight: 600; }
+  .meal input { accent-color: #27ae60; width: 17px; height: 17px; }
+  .mealnote { width: 100%; border: 1px solid #ddd; border-radius: 8px; padding: 8px 10px; font-size: 14px; margin-top: 4px; }
+  .mealweek { font-size: 12.5px; color: #555; margin-top: 8px; }
 </style>
 </head>
 <body>
@@ -56,6 +66,13 @@
   <span class="savedflash" id="flash">✓ đã lưu</span>
 </div>
 
+<div class="mealbox">
+  <h2>🍚 Ăn uống hôm nay &nbsp;<span class="mealcount" id="mealCount"></span></h2>
+  <div class="meals" id="meals"></div>
+  <input type="text" class="mealnote" id="mealNote" placeholder="Note: món lạ, bữa tự do, lỡ binge + trigger (stress? đói?)...">
+  <div class="mealweek" id="mealWeek"></div>
+</div>
+
 <div class="tabs" id="tabs"></div>
 <div class="progress" id="progress"></div>
 <div id="list"></div>
@@ -65,7 +82,7 @@
 <div class="footer">
   Double progression: đạt mức rep trên ở <b>tất cả</b> set → buổi sau tăng tạ (+2,5kg, hip thrust +5kg/bên).
   Nghỉ: bài chính 2–3p, bài phụ 60–90s. Deload tuần 6 &amp; 12: giữ tạ, còn 2 set/bài.
-  Dữ liệu lưu trên máy bạn — Dữ liệu nằm trong trình duyệt điện thoại — luôn mở bằng cùng 1 trình duyệt/icon, đừng xoá dữ liệu website Safari. Thỉnh thoảng bấm Xuất CSV để backup.
+  Dữ liệu lưu trên máy bạn — Dữ liệu nằm trong trình duyệt điện thoại — luôn mở bằng cùng 1 icon, đừng xoá dữ liệu website Safari. Chủ nhật bấm Xuất CSV để backup.
 </div>
 
 <script>
@@ -152,6 +169,39 @@ function renderAvg() {
 }
 renderAvg();
 
+// ---- meals ----
+const MEALS = ['Bữa 1 · 7:00', 'Bữa 2 · 12:00', 'Bữa 3 · 16:30', 'Bữa 4 · 19:30', 'Bữa 5 · 21:30'];
+function renderMeals() {
+  const data = load('meals', {});            // { 'YYYY-MM-DD': {done:[bool x5], note:''} }
+  const today = data[TODAY] || { done: [false,false,false,false,false], note: '' };
+  const box = document.getElementById('meals');
+  box.innerHTML = '';
+  MEALS.forEach((m, i) => {
+    const lb = document.createElement('label');
+    lb.className = 'meal' + (today.done[i] ? ' on' : '');
+    lb.innerHTML = `<input type="checkbox" ${today.done[i] ? 'checked' : ''}> ${m}`;
+    lb.querySelector('input').addEventListener('change', ev => {
+      today.done[i] = ev.target.checked;
+      data[TODAY] = today; save('meals', data); renderMeals();
+    });
+    box.appendChild(lb);
+  });
+  const n = today.done.filter(Boolean).length;
+  const mc = document.getElementById('mealCount');
+  mc.textContent = n + '/5 bữa'; mc.className = 'mealcount' + (n === 5 ? ' full' : '');
+  const noteEl = document.getElementById('mealNote');
+  noteEl.value = today.note || '';
+  noteEl.onchange = () => { today.note = noteEl.value.trim(); data[TODAY] = today; save('meals', data); };
+  // 7 ngày gần nhất
+  const days = Object.entries(data).sort((a,b)=>a[0]<b[0]?1:-1).slice(0,7);
+  if (days.length) {
+    document.getElementById('mealWeek').textContent =
+      '7 ngày gần nhất: ' + days.map(([d,v]) => d.slice(8) + '/' + (v.done?v.done.filter(Boolean).length:0) + 'b').join(' · ')
+      + '  (mục tiêu: đủ 5 bữa mỗi ngày — vũ khí chống binge số 1)';
+  }
+}
+renderMeals();
+
 // ---- tabs ----
 const NAMES = ['CN','T2','T3','T4','T5','T6','T7'];
 const tabsEl = document.getElementById('tabs');
@@ -237,8 +287,11 @@ render();
 document.getElementById('exportBtn').addEventListener('click', () => {
   const log = load('exlog', {});
   const w = load('bodyweights', {});
+  const meals = load('meals', {});
   let rows = [['Loại','Ngày','Bài tập','Tạ','Note']];
   Object.entries(w).sort().forEach(([d,v]) => rows.push(['Cân nặng', d, '', String(v), '']));
+  Object.entries(meals).sort().forEach(([d,v]) =>
+    rows.push(['Ăn uống', d, '', (v.done?v.done.filter(Boolean).length:0) + '/5 bữa', v.note||'']));
   Object.entries(log).forEach(([ex, arr]) =>
     arr.forEach(h => rows.push(['Buổi tập', h.d, ex, h.kg||'', h.note||''])));
   const csv = '﻿' + rows.map(r => r.map(c => '"' + String(c).replace(/"/g,'""') + '"').join(',')).join('\n');
