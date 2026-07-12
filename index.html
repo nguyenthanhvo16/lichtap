@@ -51,6 +51,15 @@
   .meal input { accent-color: #27ae60; width: 17px; height: 17px; }
   .mealnote { width: 100%; border: 1px solid #ddd; border-radius: 8px; padding: 8px 10px; font-size: 14px; margin-top: 4px; }
   .mealweek { font-size: 12.5px; color: #555; margin-top: 8px; }
+  .kbar { position: relative; height: 22px; background: #ececea; border-radius: 11px; overflow: hidden; margin: 4px 0 10px; }
+  .kfill { height: 100%; background: #27ae60; width: 0%; transition: width .3s; }
+  .kfill.over { background: #e67e22; }
+  .klabel { position: absolute; top: 0; left: 0; right: 0; text-align: center; font-size: 12.5px; line-height: 22px; font-weight: 600; color: #2c3e50; }
+  .mealrow { display: flex; align-items: center; gap: 7px; margin-bottom: 7px; flex-wrap: wrap; }
+  .mealrow .mname { font-size: 13px; font-weight: 600; width: 96px; }
+  .mealrow input[type=checkbox] { accent-color: #27ae60; width: 18px; height: 18px; }
+  .m-food { flex: 1; min-width: 130px; border: 1px solid #ddd; border-radius: 8px; padding: 7px 9px; font-size: 13.5px; }
+  .m-kcal { width: 78px; border: 1px solid #ddd; border-radius: 8px; padding: 7px 9px; font-size: 13.5px; }
 </style>
 </head>
 <body>
@@ -70,7 +79,9 @@
 
 <div class="mealbox">
   <h2>🍚 Ăn uống hôm nay &nbsp;<span class="mealcount" id="mealCount"></span></h2>
-  <div class="meals" id="meals"></div>
+  <div class="kbar"><div class="kfill" id="kcalFill"></div><span class="klabel" id="kcalLabel"></span></div>
+  <div id="meals"></div>
+  <div class="mealrow" style="justify-content:flex-end"><span style="font-size:12.5px;color:#555">🎯 Mục tiêu ngày (kcal):</span><input type="text" class="m-kcal" id="kcalTarget" inputmode="numeric"></div>
   <input type="text" class="mealnote" id="mealNote" placeholder="Note: món lạ, bữa tự do, lỡ binge + trigger (stress? đói?)...">
   <div class="mealweek" id="mealWeek"></div>
 </div>
@@ -194,33 +205,61 @@ renderAvg();
 
 // ---- meals ----
 const MEALS = ['Bữa 1 · 7:00', 'Bữa 2 · 12:00', 'Bữa 3 · 16:30', 'Bữa 4 · 19:30', 'Bữa 5 · 21:30'];
+const kcalTargetEl = document.getElementById('kcalTarget');
+kcalTargetEl.value = load('kcaltarget', 2500);
+kcalTargetEl.addEventListener('change', () => {
+  const v = parseInt(kcalTargetEl.value);
+  if (v > 1000 && v < 6000) save('kcaltarget', v);
+  renderMeals();
+});
 function renderMeals() {
-  const data = load('meals', {});            // { 'YYYY-MM-DD': {done:[bool x5], note:''} }
-  const today = data[TODAY] || { done: [false,false,false,false,false], note: '' };
+  const data = load('meals', {});
+  const t = data[TODAY] || {};
+  const today = {
+    done: t.done || [false,false,false,false,false],
+    foods: t.foods || ['','','','',''],
+    kcal: t.kcal || ['','','','',''],
+    note: t.note || ''
+  };
+  const persist = () => { data[TODAY] = today; save('meals', data); };
   const box = document.getElementById('meals');
   box.innerHTML = '';
   MEALS.forEach((m, i) => {
-    const lb = document.createElement('label');
-    lb.className = 'meal' + (today.done[i] ? ' on' : '');
-    lb.innerHTML = `<input type="checkbox" ${today.done[i] ? 'checked' : ''}> ${m}`;
-    lb.querySelector('input').addEventListener('change', ev => {
-      today.done[i] = ev.target.checked;
-      data[TODAY] = today; save('meals', data); renderMeals();
-    });
-    box.appendChild(lb);
+    const row = document.createElement('div');
+    row.className = 'mealrow';
+    const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+    row.innerHTML = `<input type="checkbox" ${today.done[i] ? 'checked' : ''}>` +
+      `<span class="mname" style="${today.done[i] ? 'color:#27ae60' : ''}">${m}</span>` +
+      `<input type="text" class="m-food" placeholder="Ăn gì?" value="${esc(today.foods[i])}">` +
+      `<input type="text" class="m-kcal" inputmode="numeric" placeholder="kcal" value="${esc(today.kcal[i])}">`;
+    const cb = row.children[0], food = row.children[2], kc = row.children[3];
+    cb.addEventListener('change', () => { today.done[i] = cb.checked; persist(); renderMeals(); });
+    food.addEventListener('change', () => { today.foods[i] = food.value.trim(); if (food.value.trim() && !today.done[i]) { today.done[i] = true; } persist(); renderMeals(); });
+    kc.addEventListener('change', () => { today.kcal[i] = kc.value.trim(); persist(); renderMeals(); });
+    box.appendChild(row);
   });
   const n = today.done.filter(Boolean).length;
   const mc = document.getElementById('mealCount');
   mc.textContent = n + '/5 bữa'; mc.className = 'mealcount' + (n === 5 ? ' full' : '');
+  // thanh tiến độ kcal
+  const target = parseInt(load('kcaltarget', 2500)) || 2500;
+  const sum = today.kcal.reduce((s,v) => s + (parseInt(v) || 0), 0);
+  const fill = document.getElementById('kcalFill');
+  fill.style.width = Math.min(100, sum / target * 100) + '%';
+  fill.classList.toggle('over', sum > target + 150);
+  document.getElementById('kcalLabel').textContent = sum
+    ? sum.toLocaleString('vi-VN') + ' / ' + target.toLocaleString('vi-VN') + ' kcal' + (sum > target + 150 ? ' — dư ' + (sum-target) : sum >= target - 150 ? ' ✓ đủ' : ' — còn ' + (target-sum))
+    : '0 / ' + target.toLocaleString('vi-VN') + ' kcal — nhập kcal từng bữa để thanh chạy';
   const noteEl = document.getElementById('mealNote');
   noteEl.value = today.note || '';
-  noteEl.onchange = () => { today.note = noteEl.value.trim(); data[TODAY] = today; save('meals', data); };
-  // 7 ngày gần nhất
+  noteEl.onchange = () => { today.note = noteEl.value.trim(); persist(); };
   const days = Object.entries(data).sort((a,b)=>a[0]<b[0]?1:-1).slice(0,7);
   if (days.length) {
     document.getElementById('mealWeek').textContent =
-      '7 ngày gần nhất: ' + days.map(([d,v]) => d.slice(8) + '/' + (v.done?v.done.filter(Boolean).length:0) + 'b').join(' · ')
-      + '  (mục tiêu: đủ 5 bữa mỗi ngày — vũ khí chống binge số 1)';
+      '7 ngày gần nhất: ' + days.map(([d,v]) => {
+        const k = (v.kcal||[]).reduce((s,x)=>s+(parseInt(x)||0),0);
+        return d.slice(8) + ': ' + (v.done?v.done.filter(Boolean).length:0) + 'b' + (k ? '·' + k + 'k' : '');
+      }).join(' · ');
   }
 }
 renderMeals();
@@ -330,8 +369,14 @@ document.getElementById('exportBtn').addEventListener('click', () => {
   Object.entries(wa).sort().forEach(([d,v]) => rows.push(['Eo (cm)', d, '', String(v), '']));
   const dn = load('daynotes', {});
   Object.entries(dn).sort().forEach(([d,v]) => { if(v) rows.push(['Cardio/Thêm', d, '', '', v]); });
-  Object.entries(meals).sort().forEach(([d,v]) =>
-    rows.push(['Ăn uống', d, '', (v.done?v.done.filter(Boolean).length:0) + '/5 bữa', v.note||'']));
+  Object.entries(meals).sort().forEach(([d,v]) => {
+    const k = (v.kcal||[]).reduce((s,x)=>s+(parseInt(x)||0),0);
+    rows.push(['Ăn uống', d, 'Tổng ngày', (v.done?v.done.filter(Boolean).length:0) + '/5 bữa' + (k ? ' · ' + k + ' kcal' : ''), v.note||'']);
+    (v.foods||[]).forEach((f,i) => {
+      const kc = (v.kcal||[])[i];
+      if (f || kc) rows.push(['Bữa ăn', d, 'Bữa ' + (i+1), kc || '', f || '']);
+    });
+  });
   Object.entries(log).forEach(([ex, arr]) =>
     arr.forEach(h => rows.push(['Buổi tập', h.d, ex, h.kg||'', h.note||''])));
   const csv = '﻿' + rows.map(r => r.map(c => '"' + String(c).replace(/"/g,'""') + '"').join(',')).join('\n');
