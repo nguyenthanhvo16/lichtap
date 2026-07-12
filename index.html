@@ -88,25 +88,25 @@
 <script>
 const PLAN = {
  1: { title: "Thứ 2 – PULL A (nặng)", ex: [
-  ["Kéo xà rộng tay","4 x 6–8","Body (+2,5kg nếu dễ)","ƯU TIÊN LAT: kéo khuỷu tay xuống-vào hông, giữ 1s ở đáy"],
-  ["Barbell Row","4 x 6–8","75kg","Bài chính"],
+  ["Kéo xà rộng tay","4 x 6–8","Body +5kg","ƯU TIÊN LAT: khuỷu xuống-vào hông, giữ 1s. Đạt 4x8 → +7,5"],
+  ["Barbell Row","4 x 6–8","77,5kg","Bài chính. Tuần 1 đạt 4x8 @75 → lên 77,5"],
   ["Kéo lat pulldown máy robot","3 x 10–12","60kg/bên","Ngả nhẹ, kéo về xương ức, squeeze lat dưới"],
   ["Hyperextension","3 x 10–12","55kg",""],
   ["Tay trước với EZ bar","3 x 8–10","30kg",""],
   ["Tay trước với cáp","2 x 12–15","45kg",""]]},
  2: { title: "Thứ 3 – LEGS A (đùi trước)", ex: [
-  ["Squat","4 x 5–7","92,5kg","Bài chính"],
+  ["Squat","4 x 5–8","95kg","Bài chính. Giữ 95, chốt 4x8 FORM SẠCH → tuần sau 97,5"],
   ["RDL","3 x 8–10","90kg",""],
   ["Bulgarian Split Squat","3 x 10–12","DB 22,5 x2",""],
   ["Đá đùi trước","3 x 10–12","100kg",""],
   ["Móc đùi sau","3 x 12","70kg",""],
   ["Hip adduction","3 x 12–15","50–70kg tuỳ máy",""]]},
  3: { title: "Thứ 4 – PUSH A (ngực nặng)", ex: [
-  ["Ngực trên với máy smith","4 x 6–8","60kg","ƯU TIÊN NGỰC TRÊN: làm bài đầu khi sung nhất"],
+  ["Ngực trên với máy smith/robot","4 x 6–8","47,5kg/bên","ƯU TIÊN NGỰC TRÊN: bài đầu khi sung nhất. Tuần 1 vượt khung @45"],
   ["Dips","4 x 6–8","Body +12,5kg","Nghiêng người trước để ăn ngực"],
   ["Ép ngực với máy","3 x 10–12","62kg",""],
   ["Vai trước với máy smith","3 x 8–10","50kg",""],
-  ["Bay vai với cáp","4 x 12–15","36kg/bên","ƯU TIÊN VAI GIỮA: khống chế 2s khi hạ"],
+  ["Bay vai với cáp","4 x 12–15","36kg/bên","ƯU TIÊN VAI GIỮA: hạ 2s. Đạt 4x15 → tăng"],
   ["Tay sau với cáp cao","3 x 10–12","50kg",""]]},
  4: { title: "Thứ 5 – PULL B (volume)", ex: [
   ["Kéo xà hẹp tay song song","4 x 8–10","Body",""],
@@ -116,17 +116,17 @@ const PLAN = {
   ["Bay vai sau với máy ép ngực","3 x 12–15","62kg",""],
   ["Tay trước với cáp","3 x 10–12","50kg",""]]},
  5: { title: "Thứ 6 – PUSH B (vai)", ex: [
-  ["Overhead push với máy robot","4 x 8–10","30kg/bên","Bài chính"],
+  ["Overhead push với máy robot","4 x 8–10","35kg/bên","Bài chính. Tuần 1 đạt 4x11 @32,5 → lên 35"],
   ["Ngực nghiêng với máy robot","3 x 10–12","40kg/bên","Góc nghiêng = thêm volume ngực trên"],
   ["Ép ngực góc cao với cáp","3 x 10–12","35kg/bên","Đánh ngực trên — vùng ưu tiên"],
   ["Upright Row","3 x 10–12","45kg","Kéo tới ngực, khuỷu không quá vai"],
   ["Bay vai với cáp","3 x 15–20","30kg/bên","Nhẹ, pump, nghỉ 45s"],
-  ["Tay sau với cáp set thấp","3 x 12–15","45kg",""]]},
+  ["Tay sau với cáp set thấp","3 x 12–15","54kg",""]]},
  6: { title: "Thứ 7 – LEGS B (mông + đùi sau)", ex: [
-  ["Hip Thrust với máy robot","4 x 10–12","80kg/bên","Bài chính. Đạt 4x12 → +5kg/bên"],
+  ["Hip Thrust với máy robot","4 x 10–12","85kg/bên","Bài chính. Tuần 1 đạt 4x12 @80 → lên 85"],
   ["Squat (nhẹ)","3 x 8–10","80kg","~85% ngày nặng, tập kỹ thuật"],
-  ["Kick back (đá dọc)","3 x 12–13 mỗi chân","45kg",""],
-  ["Kick back (đá ngang)","3 x 12 mỗi bên","26kg",""],
+  ["Kick back (đá dọc)","3 x 12–13 mỗi chân","46kg",""],
+  ["Kick back (đá ngang)","3 x 12 mỗi bên","32kg",""],
   ["Seated Hip Abduction","3 x 12–15","80–100kg tuỳ máy",""],
   ["Móc đùi sau","3 x 12–15","65kg","Nhẹ hơn Legs A"]]},
  0: { title: "Chủ nhật – PUSH C pump (tuỳ chọn)", ex: [
@@ -247,8 +247,8 @@ function render() {
           ${lastOther ? `<div class="last">Lần trước (${lastOther.d.slice(5)}): ${lastOther.kg}${lastOther.note ? ' — ' + lastOther.note : ''}</div>` : ''}
           ${hist.length > 1 ? `<button class="histbtn" data-ex="${name}">📜 Xem lịch sử (${hist.length} buổi) ▾</button><div class="hist" id="hist-${plan.ex.findIndex(e=>e[0]===name)}">${hist.slice(-10).reverse().map(h=>`<div><b>${h.d.slice(5)}</b>: ${h.kg||'—'}${h.note?' — '+h.note:''}</div>`).join('')}</div>` : ''}
           <div class="inputs">
-            <input type="text" class="w-kg" inputmode="decimal" placeholder="Tạ hôm nay" data-ex="${name}" data-f="kg" value="${todayEntry?todayEntry.kg:''}">
-            <input type="text" class="w-note" placeholder="Note (rep đạt, cảm giác...)" data-ex="${name}" data-f="note" value="${todayEntry?(todayEntry.note||''):''}">
+            <input type="text" class="w-kg" inputmode="decimal" placeholder="${viewDow===todayDow?'Tạ hôm nay':'—'}" data-ex="${name}" data-f="kg" value="${todayEntry?todayEntry.kg:''}" ${viewDow!==todayDow?'disabled':''}>
+            <input type="text" class="w-note" placeholder="${viewDow===todayDow?'Note (rep đạt, cảm giác...)':'Chỉ nhập được ở tab hôm nay'}" data-ex="${name}" data-f="note" value="${todayEntry?(todayEntry.note||''):''}" ${viewDow!==todayDow?'disabled':''}>
           </div>
         </div>
       </div>`;
