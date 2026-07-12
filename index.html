@@ -62,6 +62,8 @@
 <div class="weightbox">
   <label>⚖️ Cân sáng nay (kg):</label>
   <input type="text" id="bodyw" inputmode="decimal" placeholder="71.4">
+  <label>📏 Eo (cm):</label>
+  <input type="text" id="waist" inputmode="decimal" placeholder="2 tuần/lần">
   <span class="avg" id="avg7"></span>
   <span class="savedflash" id="flash">✓ đã lưu</span>
 </div>
@@ -174,6 +176,21 @@ function renderAvg() {
   }
 }
 renderAvg();
+
+// ---- waist ----
+(function(){
+  const ws = load('waists', {});
+  const el = document.getElementById('waist');
+  if (ws[TODAY]) el.value = ws[TODAY];
+  else {
+    const last = Object.entries(ws).sort().slice(-1)[0];
+    if (last) el.placeholder = 'Gần nhất: ' + last[1] + ' (' + last[0].slice(5) + ')';
+  }
+  el.addEventListener('change', () => {
+    const v = parseFloat(el.value.replace(',','.'));
+    if (!isNaN(v) && v > 40 && v < 150) { ws[TODAY] = v; save('waists', ws); }
+  });
+})();
 
 // ---- meals ----
 const MEALS = ['Bữa 1 · 7:00', 'Bữa 2 · 12:00', 'Bữa 3 · 16:30', 'Bữa 4 · 19:30', 'Bữa 5 · 21:30'];
@@ -309,6 +326,8 @@ document.getElementById('exportBtn').addEventListener('click', () => {
   const meals = load('meals', {});
   let rows = [['Loại','Ngày','Bài tập','Tạ','Note']];
   Object.entries(w).sort().forEach(([d,v]) => rows.push(['Cân nặng', d, '', String(v), '']));
+  const wa = load('waists', {});
+  Object.entries(wa).sort().forEach(([d,v]) => rows.push(['Eo (cm)', d, '', String(v), '']));
   const dn = load('daynotes', {});
   Object.entries(dn).sort().forEach(([d,v]) => { if(v) rows.push(['Cardio/Thêm', d, '', '', v]); });
   Object.entries(meals).sort().forEach(([d,v]) =>
