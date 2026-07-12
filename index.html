@@ -73,6 +73,12 @@
   <div class="mealweek" id="mealWeek"></div>
 </div>
 
+<div class="mealbox">
+  <h2>🏃 Cardio / tập thêm hôm nay</h2>
+  <input type="text" class="mealnote" id="dayNote" placeholder="VD: đi bộ dốc 30p sau tập, 8.000 bước, đá bóng, sumo test tạ mới...">
+  <div class="mealweek" id="dayNoteWeek"></div>
+</div>
+
 <div class="tabs" id="tabs"></div>
 <div class="progress" id="progress"></div>
 <div id="list"></div>
@@ -82,7 +88,7 @@
 <div class="footer">
   Double progression: đạt mức rep trên ở <b>tất cả</b> set → buổi sau tăng tạ (+2,5kg, hip thrust +5kg/bên).
   Nghỉ: bài chính 2–3p, bài phụ 60–90s. Deload tuần 6 &amp; 12: giữ tạ, còn 2 set/bài.
-  Dữ liệu lưu trên máy bạn — Dữ liệu nằm trong trình duyệt điện thoại — luôn mở bằng cùng 1 icon, đừng xoá dữ liệu website Safari. Chủ nhật bấm Xuất CSV để backup.
+  Dữ liệu lưu trên máy bạn — Dữ liệu nằm trong trình duyệt điện thoại — luôn mở bằng cùng 1 icon. Chủ nhật bấm Xuất CSV backup.
 </div>
 
 <script>
@@ -124,11 +130,11 @@ const PLAN = {
   ["Tay sau với cáp set thấp","3 x 12–15","54kg",""]]},
  6: { title: "Thứ 7 – LEGS B (mông + đùi sau)", ex: [
   ["Hip Thrust với máy robot","4 x 10–12","85kg/bên","Bài chính. Tuần 1 đạt 4x12 @80 → lên 85"],
-  ["Squat (nhẹ)","3 x 8–10","80kg","~85% ngày nặng, tập kỹ thuật"],
+  ["Sumo Deadlift","3 x 6–8","100kg (50/bên)","Mông + đùi sau. Lưng thẳng, gối đẩy ra, squeeze mông ở đỉnh. Đạt 3x8 → +5kg"],
+  ["Squat (nhẹ)","3 x 8–10","80kg","~85% ngày nặng, ưu tiên form đẹp, không ép rep"],
   ["Kick back (đá dọc)","3 x 12–13 mỗi chân","46kg",""],
   ["Kick back (đá ngang)","3 x 12 mỗi bên","32kg",""],
-  ["Seated Hip Abduction","3 x 12–15","80–100kg tuỳ máy",""],
-  ["Móc đùi sau","3 x 12–15","65kg","Nhẹ hơn Legs A"]]},
+  ["Seated Hip Abduction","3 x 12–15","80–100kg tuỳ máy",""]]},
  0: { title: "Chủ nhật – PUSH C pump (tuỳ chọn)", ex: [
   ["Ép ngực góc dưới với cáp","3 x 12–15","27kg/bên","Pump nhẹ, squeeze 1s, không tới liệt cơ"],
   ["Bay vai với cáp","3 x 15–20","30kg/bên",""],
@@ -201,6 +207,19 @@ function renderMeals() {
   }
 }
 renderMeals();
+
+// ---- day note (cardio / tập thêm) ----
+(function(){
+  const notes = load('daynotes', {});
+  const el = document.getElementById('dayNote');
+  el.value = notes[TODAY] || '';
+  el.addEventListener('change', () => { notes[TODAY] = el.value.trim(); save('daynotes', notes); renderDN(); });
+  function renderDN(){
+    const ds = Object.entries(notes).filter(([d,v])=>v).sort((a,b)=>a[0]<b[0]?1:-1).slice(0,5);
+    document.getElementById('dayNoteWeek').textContent = ds.length ? 'Gần đây: ' + ds.map(([d,v])=>d.slice(5)+': '+v).join(' · ') : '';
+  }
+  renderDN();
+})();
 
 // ---- tabs ----
 const NAMES = ['CN','T2','T3','T4','T5','T6','T7'];
@@ -290,6 +309,8 @@ document.getElementById('exportBtn').addEventListener('click', () => {
   const meals = load('meals', {});
   let rows = [['Loại','Ngày','Bài tập','Tạ','Note']];
   Object.entries(w).sort().forEach(([d,v]) => rows.push(['Cân nặng', d, '', String(v), '']));
+  const dn = load('daynotes', {});
+  Object.entries(dn).sort().forEach(([d,v]) => { if(v) rows.push(['Cardio/Thêm', d, '', '', v]); });
   Object.entries(meals).sort().forEach(([d,v]) =>
     rows.push(['Ăn uống', d, '', (v.done?v.done.filter(Boolean).length:0) + '/5 bữa', v.note||'']));
   Object.entries(log).forEach(([ex, arr]) =>
