@@ -157,10 +157,21 @@ const PLAN = {
 
 const todayDow = new Date().getDay();
 let viewDow = todayDow;
-const dateKey = d => d.toISOString().slice(0,10);
+const dateKey = d => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); // giờ ĐỊA PHƯƠNG, hết lỗi log trước 7h sáng bị lùi 1 ngày
 const TODAY = dateKey(new Date());
 
 function load(k, fb) { try { return JSON.parse(localStorage.getItem(k)) ?? fb; } catch(e){ return fb; } }
+
+// Sửa dữ liệu 1 lần: buổi Pull sáng 13/7 bị ghi nhầm thành 12/7 do lỗi múi giờ cũ
+(function(){
+  if (localStorage.getItem('fix_tz_130726')) return;
+  const fixEx = ['Kéo xà rộng tay','Barbell Row','Kéo lat pulldown máy robot','Hyperextension','Tay trước với EZ bar','Tay trước với cáp'];
+  const log = load('exlog', {});
+  let changed = false;
+  fixEx.forEach(n => (log[n]||[]).forEach(h => { if (h.d === '2026-07-12') { h.d = '2026-07-13'; changed = true; } }));
+  if (changed) localStorage.setItem('exlog', JSON.stringify(log));
+  localStorage.setItem('fix_tz_130726', '1');
+})();
 function save(k, v) { localStorage.setItem(k, JSON.stringify(v)); flash(); }
 function flash() {
   const f = document.getElementById('flash');
