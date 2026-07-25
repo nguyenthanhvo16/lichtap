@@ -99,46 +99,46 @@
 <button class="export" id="exportBtn">⬇️ Xuất toàn bộ dữ liệu (CSV cho Excel)</button>
 
 <div class="footer">
-  Double progression: đạt mức rep trên ở <b>tất cả</b> set → buổi sau tăng tạ (+2,5kg, hip thrust +5kg/bên).
+  Máy/cáp/tạ đeo: đạt trần rep mọi set → tăng 1 nấc. Bài barbell (bánh nhỏ nhất 2,5kg): đạt trần rep → xây thêm 2 rep/set → nhảy +5kg, chấp nhận rep tụt về đáy khung rồi leo lại.
   Nghỉ: bài chính 2–3p, bài phụ 60–90s. Deload tuần 6 &amp; 12: giữ tạ, còn 2 set/bài.
-  Dữ liệu lưu trên máy bạn — Dữ liệu nằm trong trình duyệt điện thoại — luôn mở bằng cùng 1 icon. Chủ nhật bấm Xuất CSV backup.
+  Dữ liệu nằm trong trình duyệt điện thoại — luôn mở bằng cùng 1 icon. Chủ nhật bấm Xuất CSV backup.
 </div>
 
 <script>
 const PLAN = {
  1: { title: "Thứ 2 – PULL A (nặng)", ex: [
-  ["Kéo xà rộng tay","4 x 6–8","Body +7,5kg","ƯU TIÊN LAT. Tuần 2 đạt 4x8 @+5 → lên +7,5"],
-  ["Barbell Row","4 x 6–8","80kg","Bài chính. Giữ 80 (tuần 2: 7,7,6,6) — chốt 4x8 → 82,5"],
+  ["Kéo xà rộng tay","4 x 6–8","Body +10kg","ƯU TIÊN LAT. Tuần 3 đạt 4x8 @+7,5 → lên +10 (tạ đeo lẻ được)"],
+  ["Barbell Row","4 x 6–10","80kg","Bài chính. Đã đạt 4x8 — xây lên 4x10 → nhảy 85 (bước 5kg)"],
   ["Kéo lat pulldown (máy thường)","3 x 10–12","82kg","Tuần 2: 4x11 @82 form đẹp. Đạt 12 → 88"],
   ["Hyperextension","3 x 10–12","55kg",""],
   ["Tay trước với EZ bar","3 x 8–10","30kg",""],
   ["Tay trước với cáp","2 x 12–15","45kg",""]]},
  2: { title: "Thứ 3 – LEGS A (đùi trước)", ex: [
-  ["Squat","4 x 5–8","97,5kg","Bài chính. Tuần 2 đạt 4x9 @95 → lên 97,5"],
-  ["RDL","3 x 8–10","95kg","Tuần 2: 4x9 @95. Đạt 3x10 → 97,5. KHÔNG nhảy cóc nữa nhé"],
+  ["Squat","4 x 5–10","100kg","Bài chính. Đã đạt 4x8 @100 — xây lên 4x10 → nhảy 105 (bước 5kg)"],
+  ["RDL","3 x 8–12","95kg","Đã đạt 4x10 — xây lên 3x12 → nhảy 100 (bước 5kg)"],
   ["Bulgarian Split Squat","3 x 10–12","DB 22,5 x2",""],
   ["Đá đùi trước","3 x 10–12","100kg",""],
   ["Móc đùi sau","3 x 12","70kg",""],
   ["Hip adduction","3 x 12–15","50–70kg tuỳ máy",""]]},
  3: { title: "Thứ 4 – PUSH A (ngực nặng)", ex: [
   ["Ngực trên với máy smith/robot","4 x 6–8","50kg/bên","ƯU TIÊN NGỰC TRÊN. Tuần 2 đạt 4x8 @47,5 → lên 50"],
-  ["Dips","4 x 6–8","Body +12,5kg","Nghiêng người trước để ăn ngực"],
+  ["Dips","4 x 6–8","Body +12,5kg","VAI ĐANG ĐAU: chỉ tập nếu không đau, biên độ ngắn lại. Đau → bỏ, thay ép ngực máy"],
   ["Ép ngực với máy","3 x 10–12","62kg","Tuần 2: 12,12,10 — chốt đủ 3x12 → 65"],
-  ["Vai trước với máy smith","3 x 8–10","50kg",""],
+  ["Vai trước với máy smith","3 x 8–10","50kg","VAI ĐAU thì bỏ, thay bằng ép ngực nhẹ hoặc nghỉ"],
   ["Bay vai với cáp","4 x 12–15","36kg/bên","ƯU TIÊN VAI GIỮA. Tuần 2: 14,14,15,15 — chốt 4x15 → tăng"],
   ["Tay sau với cáp cao","3 x 12–15","60kg","Tuần 2 đạt 3x15 @55 → lên 60"]]},
  4: { title: "Thứ 5 – PULL B (volume)", ex: [
-  ["Kéo xà hẹp tay song song","4 x 8–10","Body +12,5kg","Tuần 2 đạt 4x10 @+10 → lên +12,5"],
-  ["Ngồi kéo ngang rộng tay với cáp","4 x 10–12","70kg","Tuần 2 đạt 4x12 @65 → lên 70"],
-  ["Ngồi robot kéo tay dọc hẹp tay","3 x 9–11","65kg/bên","Kéo sâu, căng lat ở điểm duỗi"],
-  ["Ngồi robot kéo tay ngang rộng tay","3 x 10–12","55kg/bên",""],
+  ["Kéo xà hẹp tay song song","4 x 8–10","Body +12,5kg","Tuần 3: 12,11,10,10 @+12,5 — chốt đủ 4x10 sạch → +15"],
+  ["Ngồi kéo ngang rộng tay với cáp","4 x 10–12","70kg","Tuần 3: 4x10 @70 — đạt 4x12 → 75"],
+  ["Kéo tay dọc hẹp (máy thường)","3 x 10–12","88kg","Tuần 3: 4x11 @88 full tạ — đạt 12 → thêm rep/tempo"],
+  ["Kéo tay ngang rộng (máy thường)","3 x 10–12","81kg","Tuần 3: 3x12 @81 → 86 nếu máy có nấc"],
   ["Bay vai sau với máy ép ngực","3 x 12–15","62kg",""],
   ["Tay trước với cáp","3 x 10–12","50kg",""]]},
  5: { title: "Thứ 6 – PUSH B (vai)", ex: [
   ["Overhead push với máy robot","4 x 8–10","37,5kg/bên","Bài chính. Tuần 2 đạt 10 rep @37,5. Đủ 4x10 → 40"],
   ["Ngực nghiêng với máy robot","3 x 10–12","40kg/bên","Góc nghiêng = thêm volume ngực trên"],
   ["Ép ngực góc cao với cáp","3 x 10–12","41kg/bên","Tuần 2 đạt 3x12 @41 → tăng nấc máy tiếp"],
-  ["Upright Row","3 x 10–12","47,5kg","Tuần 2 đạt 4x12 @45 → lên 47,5"],
+  ["Face Pull","3 x 12–15","82kg","THAY Upright Row (nghỉ vai). Tuần 3 test 3x12 @82 ổn"],
   ["Bay vai với cáp","3 x 15–20","30kg/bên","Nhẹ, pump, nghỉ 45s"],
   ["Tay sau với cáp set thấp","3 x 12–15","54kg",""]]},
  6: { title: "Thứ 7 – LEGS B (mông + đùi sau)", ex: [
