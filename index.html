@@ -82,6 +82,7 @@
   <div class="kbar"><div class="kfill" id="kcalFill"></div><span class="klabel" id="kcalLabel"></span></div>
   <div id="meals"></div>
   <div class="mealrow" style="justify-content:flex-end"><span style="font-size:12.5px;color:#555">🎯 Mục tiêu ngày (kcal):</span><input type="text" class="m-kcal" id="kcalTarget" inputmode="numeric"></div>
+  <div class="mealweek" id="macroLine" style="color:#2c3e50;font-weight:600"></div>
   <input type="text" class="mealnote" id="mealNote" placeholder="Note: món lạ, bữa tự do, lỡ binge + trigger (stress? đói?)...">
   <div class="mealweek" id="mealWeek"></div>
 </div>
@@ -112,16 +113,17 @@ const PLAN = {
   ["Lat pulldown tập TỪNG BÊN","3 x 10–12 mỗi bên","30kg/bên","SỬA LỆCH TRÁI–PHẢI — gốc rễ cơn đau"],
   ["Kéo tay thẳng bằng dây thừng","3 x 12–15","25kg","Lat duỗi vai = độ DÀY. Tách rope ở cuối, không dùng tay trước"],
   ["Face pull (dây thừng)","3 x 15–20","nhẹ","Trap giữa/dưới + vai sau + xoay ngoài — giữ bả vai đúng vị trí"],
+  ["Bay vai giữa cáp","3 x 12–15","24kg/bên","Vai giữa — hồi phục nhanh, tập được nhiều buổi"],
   ["Cuốn tay trước — thanh EZ","3 x 10–12","25kg","Nắm ngửa — 2 đầu"],
   ["Hammer curl","2 x 12","DB 10","Nắm trung tính — brachialis, làm dày cánh tay"]]},
  2: { title: "Thứ 3 – PUSH A (ngực nặng)", ex: [
-  ["ĐẨY ngực TRÊN (smith + ghế dốc, hoặc máy hạ ghế thấp)","4 x 8–10","32,5kg/bên","ƯU TIÊN NGỰC TRÊN — bài đầu khi sung nhất, hạ 3s. Tay cầm ngang xương đòn, đường đẩy chếch lên ~30°"],
+  ["ĐẨY ngực TRÊN (smith + ghế dốc, hoặc máy hạ ghế thấp)","5 x 8–10","32,5kg/bên","ƯU TIÊN NGỰC TRÊN — bài đầu khi sung nhất, hạ 3s. Tay cầm ngang xương đòn, đường đẩy chếch lên ~30°"],
   ["ĐẨY ngực ngang (máy)","3 x 10–12","45kg","Ngực giữa — đa khớp, xây khối"],
+  ["BAY cáp chếch LÊN (ngực trên)","3 x 12–15","27kg/bên","Cáp gắn thấp, kéo chéo lên — cô lập ngực trên"],
   ["Shoulder press máy","3 x 8–10","27,5kg/bên","Vai trước. RIR 2–3, vai kêu = dừng ngay"],
-  ["Bay vai giữa cáp","3 x 12–15","24kg/bên","Vai giữa — hạ chậm 2s"],
+  ["Bay vai giữa cáp","4 x 12–15","24kg/bên","Vai giữa — hạ chậm 2s"],
   ["Bay vai sau (máy pec deck ngược)","3 x 15","45kg","VAI SAU — bắt buộc mỗi buổi push để cân bằng trước/sau"],
   ["Tay sau QUA ĐẦU (dây thừng)","3 x 12–15","30kg","Đầu dài chỉ giãn hết khi tay qua đầu"],
-  ["Tay sau cáp thẳng","2 x 12–15","40kg","Đầu ngoài/giữa"],
   ["Xoay ngoài vai (cáp) — khởi động khớp","2 x 15","rất nhẹ","PREHAB chóp xoay"]]},
  3: { title: "Thứ 4 – LEGS A (đùi trước)", ex: [
   ["Squat","4 x 6–10","70kg","Đa khớp. Gối theo mũi chân, xuống đủ sâu"],
@@ -130,23 +132,22 @@ const PLAN = {
   ["Móc đùi ngồi","3 x 12","50kg","Đùi sau: chức năng GẬP GỐI"],
   ["Hip adduction","2 x 15","60kg","Cơ khép"],
   ["Hip abduction","2 x 15–20","60kg","MÔNG NHỠ — squat/hip thrust không chạm tới"],
-  ["Bắp chân ĐỨNG","3 x 12–15","nhẹ","Gastrocnemius (gối thẳng)"],
-  ["Cuốn bụng cáp","2 x 15","nhẹ","Core gập thân"]]},
+  ["Bắp chân ĐỨNG","3 x 12–15","nhẹ","Gastrocnemius (gối thẳng)"],]},
  4: { title: "Thứ 5 – PULL B (lưng rộng)", ex: [
   ["Kéo xà rộng tay","4 x 6–10","Bodyweight","KHOÁ tạ đeo 6 tuần. Khuỷu xuống-vào hông, giữ 1s"],
   ["Barbell Row (nhẹ)","3 x 10–12","55kg","QUAY LẠI ở 70% tải. Hai tay CÙNG ÚP, thân 45°, không giật người. Chỉ 1 buổi/tuần. +5kg mỗi 2 tuần NẾU mức giật = 0. Giật tăng sau buổi này → bỏ lại 2 tuần"],
   ["Lat pulldown — nắm ngửa hoặc hẹp","3 x 10–12","55kg","Lat dưới + tay trước"],
   ["Kéo tay thẳng bằng dây thừng","3 x 15","25kg","Lat thuần"],
   ["Bay vai sau (máy pec deck ngược)","3 x 15","45kg","Vai sau"],
-  ["Bay vai giữa cáp","2 x 15","24kg/bên","Vai giữa"],
+  ["Bay vai giữa cáp","3 x 15","24kg/bên","Vai giữa"],
   ["Tay trước cáp","3 x 12","40kg","Cáp phía sau thân — đầu dài được giãn"],
   ["Cuốn cổ tay (thanh EZ)","2 x 15","nhẹ","Cẳng tay"]]},
  5: { title: "Thứ 6 – PUSH B (vai)", ex: [
-  ["Shoulder press máy","4 x 8–10","27,5kg/bên","BÀI CHÍNH buổi này. RIR 2–3"],
-  ["ĐẨY ngực TRÊN (nhẹ hơn Push A)","3 x 10–12","30kg/bên","Ngực trên"],
-  ["BAY cáp chếch XUỐNG","3 x 12–15","27kg/bên","Ngực dưới — góc thứ 3. Cáp gắn cao, kéo chéo xuống"],
+  ["Shoulder press máy","5 x 8–10","27,5kg/bên","BÀI CHÍNH buổi này. RIR 2–3"],
+  ["ĐẨY ngực TRÊN (nhẹ hơn Push A)","4 x 10–12","30kg/bên","Ngực trên"],
+  ["BAY cáp chếch XUỐNG","2 x 12–15","27kg/bên","Ngực dưới — góc thứ 3. Cáp gắn cao, kéo chéo xuống"],
   ["BAY ngực NGANG (máy pec deck)","2 x 15","nhẹ","Đơn khớp — khép ngang, ngực phần trong. Máy cho góc ngang, khỏi chỉnh dây"],
-  ["Bay vai giữa cáp","4 x 15","24kg/bên","Vai giữa — nhóm ưu tiên"],
+  ["Bay vai giữa cáp","5 x 15","24kg/bên","Vai giữa — NHÓM ƯU TIÊN"],
   ["Bay vai sau bằng cáp (chéo tay)","3 x 15","nhẹ","Vai sau"],
   ["Tay sau overhead (rope)","3 x 12–15","30kg","Đầu dài"],
   ["Xoay ngoài vai (cáp) — khởi động khớp","2 x 15","rất nhẹ","PREHAB chóp xoay"]]},
@@ -157,8 +158,7 @@ const PLAN = {
   ["Đá đùi trước","2 x 12–15","60kg","Giữ cân bằng trước/sau đùi"],
   ["Kick back (đá dọc)","3 x 12 mỗi chân","35kg","Mông lớn — biên độ duỗi hông tối đa"],
   ["Hip abduction","3 x 15–20","60kg","Mông nhỡ"],
-  ["Bắp chân NGỒI","3 x 15","nhẹ","CƠ DÉP (gối gập) — lớp cơ thứ 2"],
-  ["Pallof press (cáp) — chống xoay","2 x 12 mỗi bên","nhẹ","Core CHỐNG XOAY"]]},
+  ["Bắp chân NGỒI","3 x 15","nhẹ","CƠ DÉP (gối gập) — lớp cơ thứ 2"],]},
  0: { title: "Chủ nhật – NHẸ (pump + cardio)", ex: [
   ["BAY cáp chếch LÊN (ngực trên)","3 x 15","27kg/bên","Cáp gắn thấp, kéo chéo lên. RIR 3 — KHÔNG tới liệt cơ"],
   ["Bay vai giữa cáp","3 x 15–20","20kg/bên","Pump"],
@@ -274,6 +274,9 @@ function renderMeals() {
   document.getElementById('kcalLabel').textContent = sum
     ? sum.toLocaleString('vi-VN') + ' / ' + target.toLocaleString('vi-VN') + ' kcal' + (sum > target + 150 ? ' — dư ' + (sum-target) : sum >= target - 150 ? ' ✓ đủ' : ' — còn ' + (target-sum))
     : '0 / ' + target.toLocaleString('vi-VN') + ' kcal — nhập kcal từng bữa để thanh chạy';
+  const P = 150, F = 70;
+  const C = Math.max(0, Math.round((target - P*4 - F*9)/4));
+  document.getElementById('macroLine').textContent = 'Macro hôm nay: Đạm ' + P + 'g (KHÔNG quá 150g) · Carb ' + C + 'g · Fat ' + F + 'g';
   const noteEl = document.getElementById('mealNote');
   noteEl.value = today.note || '';
   noteEl.onchange = () => { today.note = noteEl.value.trim(); persist(); };
