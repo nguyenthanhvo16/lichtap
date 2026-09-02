@@ -73,6 +73,8 @@
   <input type="text" id="bodyw" inputmode="decimal" placeholder="71.4">
   <label>📏 Eo (cm):</label>
   <input type="text" id="waist" inputmode="decimal" placeholder="2 tuần/lần">
+  <label>😴 Ngủ (giờ):</label>
+  <input type="text" id="sleep" inputmode="decimal" placeholder="6">
   <span class="avg" id="avg7"></span>
   <span class="savedflash" id="flash">✓ đã lưu</span>
 </div>
@@ -101,7 +103,7 @@
 
 <div class="footer">
   <b>FORM TRƯỚC TẠ.</b> Dừng mỗi set khi còn dư 2–3 rep (RIR 2–3), hạ tạ có kiểm soát 2–3 giây. CHỈ tăng tạ khi đạt trần rep ở TẤT CẢ set VỚI FORM SẠCH — máy/cáp +1 nấc, barbell +5kg. Mỗi tuần chỉ tăng 1 bài chính. Rep cuối phải trông giống rep đầu; phải giật người hay đổi tư thế = tạ quá nặng, hạ xuống.
-  Nghỉ: bài chính 2–3p, bài phụ 60–90s. Deload tuần 6 &amp; 12: giữ tạ, còn 2 set/bài.
+  Nghỉ: bài chính 2–3p, bài phụ 60–90s. Deload tuần 6 &amp; 12: giữ tạ, còn 2 set/bài. <b>NGỦ 12h–6h (6 tiếng, cố định):</b> volume đã giảm 15% cho khớp khả năng hồi phục — giữ RIR 2–3, tối đa 1 set tới thất bại mỗi buổi. Không caffeine sau 14h · phòng tối &amp; mát · ngủ trưa 20–30p nếu được · cuối tuần ngủ thêm tối đa 1 tiếng.
   Dữ liệu nằm trong trình duyệt điện thoại — luôn mở bằng cùng 1 icon. Chủ nhật bấm Xuất CSV backup.
 </div>
 
@@ -228,6 +230,17 @@ renderAvg();
   el.addEventListener('change', () => {
     const v = parseFloat(el.value.replace(',','.'));
     if (!isNaN(v) && v > 40 && v < 150) { ws[TODAY] = v; save('waists', ws); }
+  });
+})();
+
+// ---- sleep ----
+(function(){
+  const sl = load('sleeps', {});
+  const el = document.getElementById('sleep');
+  if (sl[TODAY]) el.value = sl[TODAY];
+  el.addEventListener('change', () => {
+    const v = parseFloat(el.value.replace(',','.'));
+    if (!isNaN(v) && v > 0 && v < 16) { sl[TODAY] = v; save('sleeps', sl); }
   });
 })();
 
@@ -398,6 +411,8 @@ document.getElementById('exportBtn').addEventListener('click', () => {
   Object.entries(w).sort().forEach(([d,v]) => rows.push(['Cân nặng', d, '', String(v), '']));
   const wa = load('waists', {});
   Object.entries(wa).sort().forEach(([d,v]) => rows.push(['Eo (cm)', d, '', String(v), '']));
+  const sl = load('sleeps', {});
+  Object.entries(sl).sort().forEach(([d,v]) => rows.push(['Giấc ngủ (giờ)', d, '', String(v), '']));
   const dn = load('daynotes', {});
   Object.entries(dn).sort().forEach(([d,v]) => { if(v) rows.push(['Cardio/Thêm', d, '', '', v]); });
   Object.entries(meals).sort().forEach(([d,v]) => {
